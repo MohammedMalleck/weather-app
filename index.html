@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- fonts  -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet"/>
+    <!-- icons  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <link rel="stylesheet" href="style.css">
+    <title>Weather App</title>
+  </head>
+  <body>
+    <main>
+      <section class="weather-data-container">
+        <header>
+          <div class="search-icon-container">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <input placeholder="Enter City Name" type="text" />
+          <div class="search-options-container">
+            <div class="search-option-container">
+              <i class="fa-solid fa-location-dot"></i>
+              <div><span>A</span>msterdam , Netherlands</div>
+            </div>
+            <div class="search-option-container">
+              <i class="fa-solid fa-location-dot"></i>
+              <div><span>A</span>msterdam , Netherlands</div>
+            </div>
+            <div class="search-option-container">
+              <i class="fa-solid fa-location-dot"></i>
+              <div><span>A</span>msterdam , Netherlands</div>
+            </div>
+            <div class="search-option-container">
+              <i class="fa-solid fa-location-dot"></i>
+              <div><span>A</span>msterdam , Netherlands</div>
+            </div>
+            <div class="search-option-container">
+              <i class="fa-solid fa-location-dot"></i>
+              <div><span>A</span>msterdam , Netherlands</div>
+            </div>
+          </div>
+        </header>
+        <div class="weather-info-container">
+          <div class="current-weather-container">       
+            <div class="current-weather-icon"></div>
+            <div class="current-weather-description">Clear Sky</div>
+            <div class="current-weather-celsius">25°C</div>
+          </div>
+          <div class="extra-data-container">
+            <div class="data-heading">Feels Like</div>
+            <div class="data-value celsius">27°C</div>
+          </div>
+          <div class="extra-data-container">
+            <div class="data-heading">Wind Speed</div>
+            <div class="data-value speed">7.2 km/h</div>
+          </div>
+          <div class="extra-data-container">
+            <div class="data-heading">Wind Direction</div>
+            <div class="data-value direction">280°</div>
+          </div>
+          <div class="extra-data-container">
+            <div class="data-heading">Humidity</div>
+            <div class="data-value humidity">46%</div>
+          </div>
+          <div class="forecast-data-container">
+            <div class="forecast-data">
+              <div class="forecast-weather-icon"></div>
+              <div class="forecast-weather">
+                <div class="highest-celsius">27°C</div>
+                <div class="lowest-celsius">20°C</div>
+              </div>
+              <div class="forecast-day">Mon</div>
+            </div>
+            <div class="forecast-data">
+              <div class="forecast-weather-icon"></div>
+              <div class="forecast-weather">
+                <div class="highest-celsius">27°C</div>
+                <div class="lowest-celsius">20°C</div>
+              </div>
+              <div class="forecast-day">Tue</div>
+            </div>
+            <div class="forecast-data">
+              <div class="forecast-weather-icon"></div>
+              <div class="forecast-weather">
+                <div class="highest-celsius">27°C</div>
+                <div class="lowest-celsius">20°C</div>
+              </div>
+              <div class="forecast-day">Wed</div>
+            </div>
+            <div class="forecast-data">
+              <div class="forecast-weather-icon"></div>
+              <div class="forecast-weather">
+                <div class="highest-celsius">27°C</div>
+                <div class="lowest-celsius">20°C</div>
+              </div>
+              <div class="forecast-day">Thu</div>
+            </div>
+            <div class="forecast-data">
+              <div class="forecast-weather-icon"></div>
+              <div class="forecast-weather">
+                <div class="highest-celsius">27°C</div>
+                <div class="lowest-celsius">20°C</div>
+              </div>
+              <div class="forecast-day">Fri</div>
+            </div>
+          </div>
+          <div class="current-time">
+            <div class="time-heading">Current Time</div>
+            <div class="time">Sunday  , 2:40 PM</div>
+            <div class="time-short">Sun , 2:40 PM</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="loader-container">
+        <div class="loading-clouds"></div>
+        <progress max="100" value="0"></progress>
+      </div>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
