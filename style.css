@@ -50,7 +50,7 @@ main.loaded{
 }
 @keyframes loaded {
   to{
-    mask-size: 235vmin;
+    mask-size: 400vmin;
   }
 }
 .weather-data-container {
@@ -105,7 +105,7 @@ header input {
   padding: 0.5rem 0rem;
   z-index: 2;
 }
-header input.typing .search-options-container{
+header.typing .search-options-container{
   display: flex;
 }
 .search-option-container{
