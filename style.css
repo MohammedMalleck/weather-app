@@ -125,10 +125,29 @@ header.typing .search-options-container{
 .search-option-container span{
   font-weight: 500;
 }
-.search-option-container i{
+#location{
   color:  var(--search-color);
 }
-
+#history{
+  display: none;
+}
+.recent-container{
+  display: none;
+  flex: 1;
+  align-items: center;
+  justify-content: end;
+  font-size: 1.4rem;
+}
+.search-option-container.recent-searched{
+  color: rgb(43, 43, 255);
+}
+.search-option-container.recent-searched .recent-container,
+.search-option-container.recent-searched #history{
+  display: flex;
+}
+.search-option-container.recent-searched #location{
+  display: none;
+}
 .weather-info-container{
   width: 100%;
   /* background-color: green; */
