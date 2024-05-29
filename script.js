@@ -77,7 +77,8 @@ async function getWeather(latitude,longitude){
     return data.list.map((dayWeather,index) => {
       return {
         dayName : DAYS[index],
-        imgSrc : getImgSrc(dayWeather.weather[0].icon),
+        //all forcast icons must be in day format
+        imgSrc : getImgSrc(dayWeather.weather[0].icon.replace(/\w$/,'d')),
         lowestTemperature : getTemperature(dayWeather.main.temp_min),
         highestTemperature : getTemperature(dayWeather.main.temp_max)
       }
