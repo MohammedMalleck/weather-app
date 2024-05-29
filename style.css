@@ -119,6 +119,9 @@ header.typing .search-options-container{
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
+.search-option-container.hide{
+  display: none;
+}
 .search-option-container:hover{
   background-color:#e7e3e3 ;
 }

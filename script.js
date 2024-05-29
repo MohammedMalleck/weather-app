@@ -10,8 +10,8 @@ async function loader() {
   const bgImage = await getImage(latitude, longitude);
   document.querySelector("progress").value = 100;
   setTimeout(() => {
-    document.querySelector("main").classList.add("loaded");
     document.querySelector("main").style.backgroundImage = `url(${bgImage})`;
+    document.querySelector("main").classList.add("loaded");
   }, 500);
 }
 loader();
@@ -266,7 +266,7 @@ async function getImage(latitude, longitude){
 class InputEvent{
 
   #timeoutId;
-  #searchedArray = JSON.parse(localStorage.getItem('searchedArray')) || [];
+  #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
 
   constructor(element){
     element.addEventListener('input',()=>{
@@ -307,36 +307,35 @@ class InputEvent{
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
           return;
         };
-        
-    
-        const citiesArray = citiesArrayUnfiltered.map(cityObj => cityObj.name);
+
+        const citiesArray = citiesArrayUnfiltered.map(cityObj => {
+        return  { name : cityObj.name , latitude : cityObj.latitude , longitude : cityObj.longitude}
+        });
         //filter out the cities name that are repeated
-        const citiesArrayFiltered = [...new Set(citiesArray)];
-        //convert the cities names array into an array of objects
-        const citiesObjects = citiesArrayFiltered.map((name)=>{
-        return {cityName : name , hasBeenSearched :false};
+        const seen = new Set();
+        const citiesArrayFiltered = citiesArray.filter(city =>{
+          const duplicate =  seen.has(city.name)
+          seen.add(city.name);
+          return !duplicate
         });
-        //replace the value of "hasBeenSearched" for those  keywords
-        //who have been searched before
-        const citiesObjectsModified = citiesObjects.map((cityObj)=>{
-          const name = cityObj.cityName;
-          for (const cityObj of  this.#searchedArray){
-            const nameSearched = cityObj.cityName;
-            if(nameSearched === name) {
-              return {
-                cityName : name,
-                hasBeenSearched : true
-              }
-            };
-          }
-          return cityObj;
-        });
-        //get the matching searched keywords
-        const getMatchingRecentKeywords = citiesObjectsModified.filter((cityObj) => cityObj.hasBeenSearched);
-        //get the other  keywords
-        const getOtherKeywords = citiesObjectsModified.filter((cityObj) => !cityObj.hasBeenSearched);
-        //join them together such that the recent searches appear first in the array
-        const cities = [...getMatchingRecentKeywords,...getOtherKeywords];
+
+        //modify the array so the city names that have been searched before have a 
+        //unqiue "hasBeenSearched" property and are at the top of the resulting array
+        //accroding to the latest search...
+        //ie : the matched keyword which was searched recently appears at the very top
+        //and so on
+
+        const citiesArrayHistory = [
+          ...this.#searchHistory.reduce((acc,searchTxt) => {
+            const keyObj = citiesArrayFiltered.find(key => key.name === searchTxt);
+            if(keyObj){
+              acc.unshift({...keyObj,hasBeenSearched :true})
+            }
+            return acc;
+          },[]),
+          ...citiesArrayFiltered.filter(city => !this.#searchHistory.includes(city.name))
+        ];
+
 
         //display search options container
         if(!headEl.classList.contains('typing')){
@@ -344,11 +343,14 @@ class InputEvent{
         }
     
         //add html content to search options container 
-        searchOptionsContainer.innerHTML = cities.map((cityObject)=>{
-            return `<div class="search-option-container ${cityObject.hasBeenSearched ? 'recent-searched' : ''}">
+        searchOptionsContainer.innerHTML = citiesArrayHistory.map(cityObj => {
+            return `<div class="search-option-container ${cityObj.hasBeenSearched ?'recent-searched':''}" 
+            data-latitude="${cityObj.latitude}"
+            data-longitude="${cityObj.longitude}"
+            >
             <i id="history" class="fa-solid fa-clock-rotate-left"></i>
             <i id="location" class="fa-solid fa-location-dot"></i>
-            <div class="city-name">${cityObject.cityName}</div>
+            <div class="city-name">${cityObj.name}</div>
             <div class="recent-container">
               <div class="remove-text">remove</div>
             </div>
@@ -363,53 +365,50 @@ class InputEvent{
           cityNameEl.innerHTML = newText;
         });
 
-        //make search option el's interactive
-        document.querySelectorAll('.search-option-container').forEach((optionEl)=>{
-          optionEl.addEventListener('click',(e)=>{
-            const cityName = optionEl.querySelector('.city-name').textContent;
-            const removeEl = optionEl.querySelector('.remove-text');
-
-            //if the searchedArray is empty then add 
-            //the clicked keyword to the array
-            if(!this.#searchedArray.length){
-              this.addKeywordToSearchedArray(cityName);
-            }else{
-              //if it isnt empty then iterate through the array
-              //and see if this keyword is already present or not
-              for (const cityObj of this.#searchedArray){
-                //if it is present and  removed el
-                //was clicked then remove the keyword from the array
-                if(cityObj.cityName === cityName && e.target === removeEl){
-                  const matchedCityIndex = this.#searchedArray.findIndex(cityObj => cityObj.cityName === cityName);
-                  this.#searchedArray.splice(matchedCityIndex,1);
-                  localStorage.setItem('searchedArray',JSON.stringify(this.#searchedArray));
-                }else if(cityObj.cityName === cityName){
-                  //if it is present but the removed el was not clicked
-                  //then render the weather for this city
-                  console.log('render weather');
-                }else{
-                  //if its not present then add the keyword
-                  //to the array 
-                  this.addKeywordToSearchedArray(cityName);
-                }
-              }
+        document.querySelectorAll('.search-option-container').forEach(searchOption => {
+          searchOption.addEventListener('click',(e)=>{
+            const text = searchOption.querySelector('.city-name').textContent;
+            //on clicking option from recent searches 
+            //remove the previous search and then add this
+            if(this.#searchHistory.includes(text)){
+              this.#removeTextFromSearchHistory(text);
             }
-              
+            this.#searchHistory.push(text);
+            localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));
+            
+            document.querySelector('input').value = text;
             headEl.classList.remove('typing');
+            e.stopPropagation();
+          })
+        });
+
+        document.querySelectorAll('.remove-text').forEach(removeEl => {
+          removeEl.addEventListener('click',(e)=>{
+            const optionEl = removeEl.parentElement.parentElement;
+            const text = removeEl.parentElement.previousElementSibling.textContent;
+            this.#removeTextFromSearchHistory(text);
+            optionEl.classList.add('hide');
+            //hide the search options bar if 
+            //only one option was displayed
+            if(citiesArrayHistory.length < 2){
+              headEl.classList.remove('typing');
+            }
+            e.stopPropagation();
           });
+        });
+
+        document.body.addEventListener('click',()=>{
+          headEl.classList.remove('typing');
         });
       } catch(error){
         console.log(`Error while fetching cities suggestions : ${error.message}`)
       }
-    
-  
   };
 
-  addKeywordToSearchedArray(cityName){
-    this.#searchedArray.unshift({cityName : cityName , hasBeenSearched : true});
-    localStorage.setItem('searchedArray',JSON.stringify(this.#searchedArray));
-    document.querySelector('input').value = cityName;
-    console.log('after adding keyword  render weather');
+  #removeTextFromSearchHistory(text){
+    const index =  this.#searchHistory.indexOf(text);
+    this.#searchHistory.splice(index,1);
+    localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));
   }
 
 };
