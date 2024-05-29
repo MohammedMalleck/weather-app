@@ -10,10 +10,15 @@ async function loader() {
   document.querySelector("progress").value = 70;
   const bgImage = await getImage(latitude, longitude);
   document.querySelector("progress").value = 100;
-  setTimeout(() => {
+  //add image first then display weather
+  setTimeout(()=>{
+    document.querySelector('.loader-container').classList.add('hide');
+    document.querySelector("main").classList.add('addMask');
     document.querySelector("main").style.backgroundImage = `url(${bgImage})`;
+  },500)
+  setTimeout(() => {
     document.querySelector("main").classList.add("loaded");
-  }, 500);
+  }, 600);
 }
 loader();
 

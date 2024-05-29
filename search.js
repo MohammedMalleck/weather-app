@@ -58,15 +58,18 @@ export class InputEvent{
         };
 
         const citiesArray = citiesArrayUnfiltered.map(cityObj => {
-        return  { name : cityObj.name , latitude : cityObj.latitude , longitude : cityObj.longitude}
+        return  { name : cityObj.name , latitude : cityObj.latitude , longitude : cityObj.longitude , population : cityObj.population}
         });
         //filter out the cities name that are repeated
-        const seen = new Set();
-        const citiesArrayFiltered = citiesArray.filter(city =>{
-          const duplicate =  seen.has(city.name)
-          seen.add(city.name);
-          return !duplicate
-        });
+        const citiesArrayFiltered = citiesArray.reduce((acc,city)=>{
+          const existingCity = acc.find(city2 => city2.name === city.name)
+          if(!existingCity){
+            acc.push(city);
+          }else if(city.population > existingCity.population){
+            acc[acc.indexOf(existingCity)] = city
+          }    
+          return acc;
+        },[]);
 
         //modify the array so the city names that have been searched before have a 
         //unqiue "hasBeenSearched" property and are at the top of the resulting array

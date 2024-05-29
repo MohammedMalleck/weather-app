@@ -42,10 +42,12 @@ main {
   background-repeat: no-repeat;
   mask-repeat: no-repeat;
   mask-position: center;
+  mask-size: 0vmin;
+}
+main.addMask{
+  mask-image: url(images/circle.svg);
 }
 main.loaded{
-  mask-image: url(images/circle.svg);
-  mask-size: 0vmin;
   animation : loaded 2s forwards ease;
 }
 @keyframes loaded {
@@ -302,7 +304,7 @@ header.typing .search-options-container{
   box-shadow: 0px 4px 15px rgba(255, 255, 255);
   margin: auto 0 auto 0;
 }
-main.loaded .loader-container {
+.loader-container.hide {
   display: none;
 }
 .loading-clouds {
