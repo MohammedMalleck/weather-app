@@ -108,7 +108,8 @@ header input {
 header.typing .search-options-container{
   display: flex;
 }
-.search-option-container{
+.search-option-container,
+.loading-search-text{
   display: flex;
   align-items: center;
   text-shadow: none;

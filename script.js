@@ -266,14 +266,23 @@ async function getImage(latitude, longitude){
 class InputEvent{
 
   #timeoutId;
+  #intervalID;
   #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+  #inputEl = document.querySelector('input');
 
   constructor(element){
     element.addEventListener('input',()=>{
-      clearTimeout(this.#timeoutId);
-      this.#timeoutId =  setTimeout(()=>{
-        this.autoSuggestCities();
-      },1000);
+      const keyword = this.#inputEl.value;
+      if(keyword === ''){
+        document.querySelector('header').classList.remove('typing');
+      }else{
+        clearInterval(this.#intervalID);
+        this.#loadingEffect();
+        clearTimeout(this.#timeoutId);
+        this.#timeoutId =  setTimeout(()=>{
+          this.autoSuggestCities();
+        },1000);
+      };
     });
   }
   
@@ -282,10 +291,7 @@ class InputEvent{
       const headEl = document.querySelector('header');
       const keyword = document.querySelector('input').value;
     
-      if(keyword === ''){
-        headEl.classList.remove('typing');
-        return;
-      };
+
     
       const regex = new RegExp(keyword,'gi');
       try{
@@ -304,6 +310,7 @@ class InputEvent{
     
     
         if(!citiesArrayUnfiltered.length){
+          headEl.classList.add('typing')
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
           return;
         };
@@ -341,7 +348,8 @@ class InputEvent{
         if(!headEl.classList.contains('typing')){
           headEl.classList.add('typing');
         }
-    
+        //clear out the interval
+        clearInterval(this.#intervalID);
         //add html content to search options container 
         searchOptionsContainer.innerHTML = citiesArrayHistory.map(cityObj => {
             return `<div class="search-option-container ${cityObj.hasBeenSearched ?'recent-searched':''}" 
@@ -409,6 +417,21 @@ class InputEvent{
     const index =  this.#searchHistory.indexOf(text);
     this.#searchHistory.splice(index,1);
     localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));
+  }
+
+  #loadingEffect(){
+    document.querySelector('header').classList.add('typing');
+    const defaultHTML = document.querySelector('.search-options-container').innerHTML = `<div class="loading-search-text">Loading</div>`;
+    let index = 0;
+    this.#intervalID = setInterval(()=>{
+      if(index < 3){
+        document.querySelector('.loading-search-text').innerHTML += '.';
+        index++;
+      }else{
+        document.querySelector('.search-options-container').innerHTML = defaultHTML;
+        index = 0;
+      }
+    },500);
   }
 
 };
