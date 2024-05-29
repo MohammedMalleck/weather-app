@@ -53,7 +53,7 @@ async function getWeather(latitude,longitude){
     renderCurrentWeather(currentWeather);
     renderForecastWeather(weatherForecast);
  
-    
+    document.querySelector('input').value = currentWeather.cityName;
   }catch(error){
     console.log(error)  
   }
@@ -264,6 +264,23 @@ async function getImage(latitude, longitude){
     };
   };
 }
+async function getAndSetImageFromCityName(){
+  const cityName = document.querySelector('input').value;
+  try{
+    const response = await fetch(`https://api.pexels.com/v1/search?query=${cityName}&per_page=1`, {
+      headers: {
+        'Authorization': pixelAPIKey
+      }
+    });
+    if(!response.ok) throw new Error('error when getting image from city name')
+    const data = await response.json();
+    const imgURL =  data.photos[0].src.original;
+    document.querySelector('main').style.backgroundImage = `url(${imgURL})`;
+  }catch(error){
+    console.log(error.message)
+  }
+
+}
 class InputEvent{
 
   #timeoutId;
@@ -376,8 +393,9 @@ class InputEvent{
 
         document.querySelectorAll('.search-option-container').forEach(searchOption => {
           searchOption.addEventListener('click',(e)=>{
+            const { latitude , longitude } = searchOption.dataset;
             const text = searchOption.querySelector('.city-name').textContent;
-            //on clicking option from recent searches 
+            //on clicking option , from recent searches 
             //remove the previous search and then add this
             if(this.#searchHistory.includes(text)){
               this.#removeTextFromSearchHistory(text);
@@ -388,6 +406,7 @@ class InputEvent{
             document.querySelector('input').value = text;
             headEl.classList.remove('typing');
             e.stopPropagation();
+            this.#getWeatherHandler(latitude,longitude);
           })
         });
 
@@ -435,6 +454,11 @@ class InputEvent{
     },500);
   }
 
+  async #getWeatherHandler(latitude,longitude){
+    //first display weather then add image 
+    await getWeather(latitude,longitude);
+    await getAndSetImageFromCityName();
+  }
 };
 
 new InputEvent(document.querySelector('input'));
