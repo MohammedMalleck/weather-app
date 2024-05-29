@@ -51,6 +51,7 @@ export class InputEvent{
     
     
         if(!citiesArrayUnfiltered.length){
+          clearInterval(this.#intervalID);   
           headEl.classList.add('typing')
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
           return;
