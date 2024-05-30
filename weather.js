@@ -52,82 +52,27 @@ export async function getWeather(latitude,longitude){
     });
   }
   function getImgSrc(id){
-    const iconsInfo = [
-      {
-        id: '01d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/clear-day.svg'
-      },
-      {
-        id: '01n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/clear-night.svg'
-      },
-      {
-        id: '02d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/partly-cloudy-day.svg'
-      },
-      {
-        id: '02n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/partly-cloudy-night.svg'
-      },
-      {
-        id: '03d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/overcast.svg'
-      },
-      {
-        id: '03n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/overcast.svg'
-      },
-      {
-        id: '04d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/overcast.svg'
-      },
-      {
-        id: '04n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/overcast.svg'
-      },
-      {
-        id: '09d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/rain.svg'
-      },
-      {
-        id: '09n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/rain.svg'
-      },
-      {
-        id: '10d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/rain.svg'
-      },
-      {
-        id: '10n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/rain.svg'
-      },
-      {
-        id: '11d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/thunderstorms-extreme.svg'
-      },
-      {
-        id: '11n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/thunderstorms-extreme.svg'
-      },
-      {
-        id: '13d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/snow.svg'
-      },
-      {
-        id: '13n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/snow.svg'
-      },
-      {
-        id: '50d',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/mist.svg'
-      },
-      {
-        id: '50n',
-        src: 'https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/mist.svg'
-      }
-    ];
-  
-    return iconsInfo.find(icon => icon.id === id).src;
+    const iconsInfo = {
+      '01d' : 'clear-day',
+      '01n' : 'clear-night',
+      '02d' : 'partly-cloudy-day',
+      '02n' : 'partly-cloudy-night',
+      '03d' : 'overcast',
+      '03n' : 'overcast',
+      '04d' : 'overcast',
+      '04n' : 'overcast',
+      '09d' : 'rain',
+      '09n' : 'rain',
+      '10d' : 'rain',
+      '10n' : 'rain',
+      '11d' : 'thunderstorms-extreme',
+      '11n' : 'thunderstorms-extreme',
+      '13d' : 'snow',
+      '13n' : 'snow',
+      '50d' : 'mist',
+      '50n' : 'mist'
+    };
+    return `https://raw.githubusercontent.com/basmilius/weather-icons/0985c712ee2e07b269053ff6ffd86ef79c016e3a/design/fill/final/${iconsInfo[id]}.svg`;
   }
   function getTemperature(temperature){
     return (temperature - 273.15).toFixed(0) + '°C'

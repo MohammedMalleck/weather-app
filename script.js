@@ -18,7 +18,7 @@ async function loader() {
   },500)
   setTimeout(() => {
     document.querySelector("main").classList.add("loaded");
-  }, 600);
+  }, 1000);
 }
 loader();
 

@@ -9,12 +9,10 @@ export class InputEvent{
   #timeoutId;
   #intervalID;
   #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
-  #inputEl = document.querySelector('input');
 
   constructor(element){
     element.addEventListener('input',()=>{
-      const keyword = this.#inputEl.value;
-      if(keyword === ''){
+      if(element.value === ''){
         document.querySelector('header').classList.remove('typing');
       }else{
         clearInterval(this.#intervalID);
@@ -168,7 +166,8 @@ export class InputEvent{
 
   #loadingEffect(){
     document.querySelector('header').classList.add('typing');
-    const defaultHTML = document.querySelector('.search-options-container').innerHTML = `<div class="loading-search-text">Loading</div>`;
+    const defaultHTML = `<div class="loading-search-text">Loading</div>`;
+    document.querySelector('.search-options-container').innerHTML = defaultHTML;
     let index = 0;
     this.#intervalID = setInterval(()=>{
       if(index < 3){
