@@ -7,7 +7,7 @@ const {rapidAPIKey } = apiKeys();
 export class InputEvent{
 
   #timeoutId;
-  #intervalID;
+  #intervalIDSearch;
   #intervalIDWeather;
   #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
 
@@ -16,8 +16,8 @@ export class InputEvent{
       if(element.value === ''){
         document.querySelector('header').classList.remove('typing');
       }else{
-        clearInterval(this.#intervalID);
-        this.#loadingEffect();
+        clearInterval(this.#intervalIDSearch);
+        this.#loadingEffectSearch();
         clearTimeout(this.#timeoutId);
         this.#timeoutId =  setTimeout(()=>{
           this.autoSuggestCities();
@@ -56,7 +56,7 @@ export class InputEvent{
     
     
         if(!citiesArrayUnfiltered.length){
-          clearInterval(this.#intervalID);   
+          clearInterval(this.#intervalIDSearch);   
           headEl.classList.add('typing')
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
           return;
@@ -99,7 +99,7 @@ export class InputEvent{
           headEl.classList.add('typing');
         }
         //clear out the interval
-        clearInterval(this.#intervalID);
+        clearInterval(this.#intervalIDSearch);
         //add html content to search options container 
         searchOptionsContainer.innerHTML = citiesArrayHistory.map(cityObj => {
             return `<div class="search-option-container ${cityObj.hasBeenSearched ?'recent-searched':''}" 
@@ -171,30 +171,21 @@ export class InputEvent{
     localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));
   }
 
-  #loadingEffect(){
+  #loadingEffectSearch(){
     document.querySelector('header').classList.add('typing');
     const defaultHTML = `<div class="loading-search-text">Loading</div>`;
     document.querySelector('.search-options-container').innerHTML = defaultHTML;
-    let index = 0;
-    this.#intervalID = setInterval(()=>{
-      if(index < 3){
-        document.querySelector('.loading-search-text').innerHTML += '.';
-        index++;
-      }else{
-        document.querySelector('.search-options-container').innerHTML = defaultHTML;
-        index = 0;
-      }
-    },500);
+    this.#intervalIDSearch = this.#handleLoadingEffect('loading-search-text','search-options-container',defaultHTML);
   }
 
-  #loadingEffectWeather(){
+  #handleLoadingEffect(firstEl,secondEl,defaultHTML){
     let index = 0;
-    this.#intervalIDWeather = setInterval(()=>{
+    return setInterval(()=>{
       if(index < 3){
-        document.querySelector('.loading-weather-text').innerHTML += '.';
+        document.querySelector(`.${firstEl}`).innerHTML += '.';
         index++;
       }else{
-        document.querySelector('.loading-weather-text').innerHTML = 'Loading';
+        document.querySelector(`.${secondEl}`).innerHTML = defaultHTML;
         index = 0;
       }
     },500);
@@ -203,7 +194,7 @@ export class InputEvent{
   async #getWeatherHandler(latitude,longitude){
     //display loading text
     document.querySelector('.weather-data-container').classList.add('show-loading-text');
-    this.#loadingEffectWeather();
+    this.#intervalIDWeather = this.#handleLoadingEffect('loading-weather-text','loading-weather-text','Loading');
     //first display weather then add image 
     await getWeather(latitude,longitude);
     //after adding weather data
