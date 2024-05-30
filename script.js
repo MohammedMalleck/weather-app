@@ -17,7 +17,7 @@ async function loader() {
     document.querySelector("main").style.backgroundImage = `url(${bgImage})`;
   },500)
   setTimeout(() => {
-    document.querySelector("main").classList.add("loaded");
+    document.querySelector("main").classList.add("loadAnimation");
   }, 1000);
 }
 loader();

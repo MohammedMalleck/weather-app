@@ -47,10 +47,10 @@ main {
 main.addMask{
   mask-image: url(images/circle.svg);
 }
-main.loaded{
-  animation : loaded 2s forwards ease;
+main.loadAnimation{
+  animation : loadAnimation 2s forwards ease;
 }
-@keyframes loaded {
+@keyframes loadAnimation {
   to{
     mask-size: 400vmin;
   }
@@ -63,7 +63,7 @@ main.loaded{
   align-items: center;
   gap: 5rem;
 }
-main.loaded .weather-data-container{
+main.loadAnimation .weather-data-container{
   display: flex;
 }
 header {
