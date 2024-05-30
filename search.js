@@ -2,7 +2,7 @@ import { apiKeys } from "./keys.js";
 import { getWeather } from "./weather.js";
 import { getAndSetImageFromCityName } from "./images.js";
 
-const {rapidAPIKey } = apiKeys();
+const {rapidAPIKey } = apiKeys;
 
 export class InputEvent{
 
@@ -67,6 +67,11 @@ export class InputEvent{
         });
         //filter out the cities name that are repeated
         const citiesArrayFiltered = citiesArray.reduce((acc,city)=>{
+          //filter out cities with 
+          //population 0
+          if(!city.population){
+            return acc;
+          }
           const existingCity = acc.find(city2 => city2.name === city.name)
           if(!existingCity){
             acc.push(city);

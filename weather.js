@@ -1,6 +1,6 @@
 import { apiKeys } from "./keys.js";
 
-const { openWeatherAPIKey } = apiKeys();
+const { openWeatherAPIKey } = apiKeys;
 
 export async function getWeather(latitude,longitude){
   try{

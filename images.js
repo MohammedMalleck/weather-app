@@ -1,6 +1,6 @@
 import { apiKeys } from "./keys.js";
 
-const {rapidAPIKey , pixelAPIKey} = apiKeys();
+const {rapidAPIKey , pixelAPIKey} = apiKeys;
 
 export async function getImage(latitude, longitude){
   try{
