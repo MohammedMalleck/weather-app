@@ -8,6 +8,7 @@ export class InputEvent{
 
   #timeoutId;
   #intervalID;
+  #intervalIDWeather;
   #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
 
   constructor(element){
@@ -186,9 +187,29 @@ export class InputEvent{
     },500);
   }
 
+  #loadingEffectWeather(){
+    let index = 0;
+    this.#intervalIDWeather = setInterval(()=>{
+      if(index < 3){
+        document.querySelector('.loading-weather-text').innerHTML += '.';
+        index++;
+      }else{
+        document.querySelector('.loading-weather-text').innerHTML = 'Loading';
+        index = 0;
+      }
+    },500);
+  }
+
   async #getWeatherHandler(latitude,longitude){
+    //display loading text
+    document.querySelector('.weather-data-container').classList.add('show-loading-text');
+    this.#loadingEffectWeather();
     //first display weather then add image 
     await getWeather(latitude,longitude);
+    //after adding weather data
+    //remove the loading text
+    clearInterval(this.#intervalIDWeather);
+    document.querySelector('.weather-data-container').classList.remove('show-loading-text');
     await getAndSetImageFromCityName();
   }
 };

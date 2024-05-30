@@ -162,6 +162,17 @@ header.typing .search-options-container{
   justify-content: space-between;
   row-gap: 5rem;
 }
+.weather-data-container.show-loading-text .weather-info-container{
+  display: none;
+}
+.loading-weather-text{
+  margin: auto 0 auto 0;
+  font-size: 1.8rem;
+  display: none;
+}
+.weather-data-container.show-loading-text .loading-weather-text{
+  display: flex;
+}
 .current-weather-container,
 .extra-data-container,
 .current-time,
