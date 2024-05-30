@@ -23,6 +23,12 @@ export class InputEvent{
         },1000);
       };
     });
+
+    //on clicking input element make sure that
+    //search option does not get hidden.
+    element.addEventListener('click',(e)=>{
+      e.stopPropagation();
+    });
   }
   
   async autoSuggestCities(){
