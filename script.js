@@ -8,13 +8,11 @@ async function loader() {
   document.querySelector("progress").value = 40;
   await getWeather(latitude,longitude);
   document.querySelector("progress").value = 70;
-  const bgImage = await getImage(latitude, longitude);
   document.querySelector("progress").value = 100;
   //add image first then display weather
   setTimeout(()=>{
     document.querySelector('.loader-container').classList.add('hide');
     document.querySelector("main").classList.add('addMask');
-    document.querySelector("main").style.backgroundImage = `url(${bgImage})`;
   },500)
   setTimeout(() => {
     document.querySelector("main").classList.add("loadAnimation");
@@ -22,9 +20,7 @@ async function loader() {
 }
 loader();
 
-document.querySelector("main").addEventListener('animationend',()=>{
-  document.querySelector("body").style.backgroundColor = `white`;
-});
+
 
 async function getCurrentLocation(){
   if(navigator.geolocation){

@@ -42,7 +42,7 @@ main {
   background-repeat: no-repeat;
   mask-repeat: no-repeat;
   mask-position: center;
-  mask-size: 0vmin;
+  mask-size: 0%;
 }
 main.addMask{
   mask-image: url(images/circle.svg);
@@ -52,7 +52,7 @@ main.loadAnimation{
 }
 @keyframes loadAnimation {
   to{
-    mask-size: 400vmin;
+    mask-size: 200%;
   }
 }
 .weather-data-container {
@@ -128,7 +128,7 @@ header.typing .search-options-container{
 .search-option-container:hover{
   background-color:#e7e3e3 ;
 }
-.search-option-container span{
+.search-option-container .bold-text{
   font-weight: 500;
 }
 #location{

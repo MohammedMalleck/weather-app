@@ -1,8 +1,8 @@
 import { apiKeys } from "./keys.js";
 import { getWeather } from "./weather.js";
-import { getAndSetImageFromCityName } from "./images.js";
 
-const {rapidAPIKey } = apiKeys;
+
+const { geoCodingAPIKey } = apiKeys;
 
 export class InputEvent{
 
@@ -13,16 +13,12 @@ export class InputEvent{
 
   constructor(element){
     element.addEventListener('input',()=>{
-      if(element.value === ''){
-        document.querySelector('header').classList.remove('typing');
-      }else{
-        clearInterval(this.#intervalIDSearch);
-        this.#loadingEffectSearch();
-        clearTimeout(this.#timeoutId);
-        this.#timeoutId =  setTimeout(()=>{
-          this.autoSuggestCities();
-        },1000);
-      };
+      clearInterval(this.#intervalIDSearch);
+      this.#loadingEffectSearch();
+      clearTimeout(this.#timeoutId);
+      this.#timeoutId =  setTimeout(()=>{
+        this.autoSuggestCities();
+      },1000);
     });
 
     //on clicking input element make sure that
@@ -36,68 +32,57 @@ export class InputEvent{
       const searchOptionsContainer = document.querySelector('.search-options-container');
       const headEl = document.querySelector('header');
       const keyword = document.querySelector('input').value;
-    
-
-    
       const regex = new RegExp(keyword,'gi');
+
+      if(keyword === ''){
+        headEl.classList.remove('typing')
+        return;
+      }
+
       try{
-        const response = await fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&offset=0&types=CITY&namePrefix=${keyword}`,{
-          headers : {
-            'X-RapidAPI-Key' : rapidAPIKey,
-            'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
-          }
-        });
-    
-        if(!response.ok) throw new Error('Some network issues while fetching matching cities from given keyword');
+        const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${keyword}&lang=en&format=json&apiKey=${geoCodingAPIKey}`);
+
+        if(!response.ok) throw new Error('error found');
         
-    
-        const responseData = await response.json();
-        const citiesArrayUnfiltered = responseData.data;
-    
-    
-        if(!citiesArrayUnfiltered.length){
+        const data = await response.json();
+
+        if(!data.results.length){
           clearInterval(this.#intervalIDSearch);   
           headEl.classList.add('typing')
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
           return;
         };
 
-        const citiesArray = citiesArrayUnfiltered.map(cityObj => {
-        return  { name : cityObj.name , latitude : cityObj.latitude , longitude : cityObj.longitude , population : cityObj.population}
-        });
-        //filter out the cities name that are repeated
-        const citiesArrayFiltered = citiesArray.reduce((acc,city)=>{
-          //filter out cities with 
-          //population 0
-          if(!city.population){
-            return acc;
-          }
-          const existingCity = acc.find(city2 => city2.name === city.name)
-          if(!existingCity){
-            acc.push(city);
-          }else if(city.population > existingCity.population){
-            acc[acc.indexOf(existingCity)] = city
-          }    
+        //make sure the same city with same state , region and country is not repeated
+        const citiesDATA = data.results.reduce((acc,result) => {
+          if(result.city){
+            const state = result.city === result.state ? result.region  : result.state || result.region;
+
+            const key = `${result.city}-${state}-${result.country}`;
+            if(!acc.set.has(key)){
+              acc.set.add(key);
+              acc.cities.push({
+                city : result.city,
+                state : state,
+                country : result.country,
+                lat : result.lat,
+                lon : result.lon,
+              });
+            };
+          }      
           return acc;
-        },[]);
-
-        //modify the array so the city names that have been searched before have a 
-        //unqiue "hasBeenSearched" property and are at the top of the resulting array
-        //accroding to the latest search...
-        //ie : the matched keyword which was searched recently appears at the very top
-        //and so on
-
-        const citiesArrayHistory = [
-          ...this.#searchHistory.reduce((acc,searchTxt) => {
-            const keyObj = citiesArrayFiltered.find(key => key.name === searchTxt);
-            if(keyObj){
-              acc.unshift({...keyObj,hasBeenSearched :true})
-            }
-            return acc;
-          },[]),
-          ...citiesArrayFiltered.filter(city => !this.#searchHistory.includes(city.name))
-        ];
-
+        },{set : new Set() , cities : []});
+        //if any of these city have been searched before modify the data
+        //such that the most recent matched city appears at the top and so on 
+        const setSearch = new Set();
+        const citiesDATAWithSearchHistory = [...this.#searchHistory.reduce((acc,cityDetails)=>{
+          const key = `${cityDetails.city}-${cityDetails.state}-${cityDetails.country}`;
+          if(citiesDATA.set.has(key)){
+            setSearch.add(key)
+            acc.unshift({...cityDetails,hasBeenSearched : true});
+          }
+          return acc;
+        },[]),...citiesDATA.cities.filter(cityDetails => !setSearch.has(`${cityDetails.city}-${cityDetails.state}-${cityDetails.country}`))];
 
         //display search options container
         if(!headEl.classList.contains('typing')){
@@ -106,56 +91,50 @@ export class InputEvent{
         //clear out the interval
         clearInterval(this.#intervalIDSearch);
         //add html content to search options container 
-        searchOptionsContainer.innerHTML = citiesArrayHistory.map(cityObj => {
-            return `<div class="search-option-container ${cityObj.hasBeenSearched ?'recent-searched':''}" 
-            data-latitude="${cityObj.latitude}"
-            data-longitude="${cityObj.longitude}"
+        searchOptionsContainer.innerHTML = citiesDATAWithSearchHistory.map(cityDetails => {
+            return `<div class="search-option-container ${cityDetails.hasBeenSearched ? 'recent-searched' : ''}" 
+            data-lat="${cityDetails.lat}"
+            data-lon="${cityDetails.lon}"
             >
             <i id="history" class="fa-solid fa-clock-rotate-left"></i>
             <i id="location" class="fa-solid fa-location-dot"></i>
-            <div class="city-name">${cityObj.name}</div>
+            <div><span class="city-name">${cityDetails.city}</span>${cityDetails.state ? ` , <span class="state-name">${cityDetails.state}</span>`:''} , <span class="country-name">${cityDetails.country}</span></div>
             <div class="recent-container">
               <div class="remove-text">remove</div>
             </div>
           </div>`
         }).join('\n');
-    
+        
         //make matching keyword bold 
-        document.querySelectorAll('.city-name').forEach(cityNameEl =>
-        {
+        document.querySelectorAll('.city-name').forEach(cityNameEl =>{
           const cityName =  cityNameEl.textContent;
-          const newText = cityName.replace(regex,match =>`<span>${match}</span>`);
+          const newText = cityName.replace(regex,match =>`<span class="bold-text">${match}</span>`);
           cityNameEl.innerHTML = newText;
         });
 
         document.querySelectorAll('.search-option-container').forEach(searchOption => {
           searchOption.addEventListener('click',(e)=>{
-            const { latitude , longitude } = searchOption.dataset;
-            const text = searchOption.querySelector('.city-name').textContent;
-            //on clicking option , from recent searches 
-            //remove the previous search and then add this
-            if(this.#searchHistory.includes(text)){
-              this.#removeTextFromSearchHistory(text);
-            }
-            this.#searchHistory.push(text);
-            localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));
-            
-            document.querySelector('input').value = text;
+            const { lat , lon } = searchOption.dataset;
+            const cityDetails = this.#removeCityFromSearchHistory(searchOption);
+            this.#searchHistory.push(cityDetails);
+            console.log(this.#searchHistory)
+            localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));        
+            document.querySelector('input').value = searchOption.querySelector('.city-name').textContent;
             headEl.classList.remove('typing');
             e.stopPropagation();
-            this.#getWeatherHandler(latitude,longitude);
+            this.#getWeatherHandler(lat,lon);
           })
         });
 
         document.querySelectorAll('.remove-text').forEach(removeEl => {
           removeEl.addEventListener('click',(e)=>{
             const optionEl = removeEl.parentElement.parentElement;
-            const text = removeEl.parentElement.previousElementSibling.textContent;
-            this.#removeTextFromSearchHistory(text);
+            this.#removeCityFromSearchHistory(optionEl);
+            localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));      
             optionEl.classList.add('hide');
             //hide the search options bar if 
             //only one option was displayed
-            if(citiesArrayHistory.length < 2){
+            if(citiesDATAWithSearchHistory.length < 2){
               headEl.classList.remove('typing');
             }
             e.stopPropagation();
@@ -165,15 +144,22 @@ export class InputEvent{
         document.body.addEventListener('click',()=>{
           headEl.classList.remove('typing');
         });
-      } catch(error){
-        console.log(`Error while fetching cities suggestions : ${error.message}`)
-      }
+      }catch(error){
+        console.log(error.message)
+      };
   };
 
-  #removeTextFromSearchHistory(text){
-    const index =  this.#searchHistory.indexOf(text);
-    this.#searchHistory.splice(index,1);
-    localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));
+  #removeCityFromSearchHistory(element){
+    const cityDetails = {
+      city : element.querySelector('.city-name').textContent,
+      state : element.querySelector('.state-name').textContent,
+      country : element.querySelector('.country-name').textContent
+    };
+    const index = this.#searchHistory.findIndex( cityDetails2 => (cityDetails2.city === cityDetails.city && cityDetails2.state === cityDetails.state && cityDetails2.country === cityDetails.country));
+    if(index !== -1){
+      this.#searchHistory.splice(index,1);
+    }
+    return cityDetails;
   }
 
   #loadingEffectSearch(){
@@ -206,6 +192,5 @@ export class InputEvent{
     //remove the loading text
     clearInterval(this.#intervalIDWeather);
     document.querySelector('.weather-data-container').classList.remove('show-loading-text');
-    await getAndSetImageFromCityName();
   }
 };

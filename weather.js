@@ -20,7 +20,6 @@ export async function getWeather(latitude,longitude){
     renderCurrentWeather(currentWeather);
     renderForecastWeather(weatherForecast);
  
-    document.querySelector('input').value = currentWeather.cityName;
   }catch(error){
     console.log(error)  
   }
