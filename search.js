@@ -106,10 +106,26 @@ export class InputEvent{
         }).join('\n');
         
         //make matching keyword bold 
-        document.querySelectorAll('.city-name').forEach(cityNameEl =>{
-          const cityName =  cityNameEl.textContent;
-          const newText = cityName.replace(regex,match =>`<span class="bold-text">${match}</span>`);
-          cityNameEl.innerHTML = newText;
+        document.querySelectorAll('.search-option-container').forEach(optionEl =>{
+          const cityEl = optionEl.querySelector('.city-name');
+          const stateEl = optionEl.querySelector('.state-name');
+          const countryEl = optionEl.querySelector('.country-name');
+          if(regex.test(cityEl.textContent)){
+            const newText = cityEl.textContent.replace(regex, match => `<span class="bold-text">${match}</span>`);
+            cityEl.innerHTML = newText;
+          }else{
+            const letters = [...new Set(keyword)].join('');
+            const regexp = new RegExp(`[${letters}]`,'gi');
+            const newText = cityEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
+            cityEl.innerHTML = newText;
+            if(stateEl){
+              const newText = stateEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
+              stateEl.innerHTML = newText;
+            }
+            const newTextCountry = countryEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
+            countryEl.innerHTML = newTextCountry;
+          }
+          
         });
 
         document.querySelectorAll('.search-option-container').forEach(searchOption => {
