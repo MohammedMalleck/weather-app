@@ -41,4 +41,4 @@ async function getCurrentLocation(){
   }
 }
 
-new InputEvent(document.querySelector('input'));
+new InputEvent(document.querySelector('input'),document.querySelector('.search-icon-container'));

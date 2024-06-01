@@ -10,27 +10,36 @@ export class InputEvent{
   #intervalIDSearch;
   #intervalIDWeather;
   #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+  #preventAutoSuggestion;
 
-  constructor(element){
-    element.addEventListener('input',()=>{
+  constructor(inputEl,searchIcon){
+    inputEl.addEventListener('input',()=>{
+      this.#preventAutoSuggestion = false;
       clearInterval(this.#intervalIDSearch);
       this.#loadingEffectSearch();
       clearTimeout(this.#timeoutId);
       this.#timeoutId =  setTimeout(()=>{
         this.#autoSuggestCities();
-      },1000);
+      },1500);
     });
 
     //on clicking input element make sure that
     //search option does not get hidden.
-    element.addEventListener('click',(e)=>{
+    inputEl.addEventListener('click',(e)=>{
       e.stopPropagation();
     });
 
-    element.addEventListener('keydown',(e)=>{
+    inputEl.addEventListener('keydown',(e)=>{
       if(e.key === 'Enter'){
-        this.#handleEnterSearch();
+        this.#preventAutoSuggestion = true;
+        this.#handleSearch();
       }
+    });
+
+    searchIcon.addEventListener('click',(e)=>{
+      this.#preventAutoSuggestion = true;
+      this.#handleSearch();
+      e.stopPropagation();
     });
   };
   
@@ -52,7 +61,7 @@ export class InputEvent{
         
         const data = await response.json();
 
-        if(!data.results.length){
+        if(!data.results.length && !this.#preventAutoSuggestion){
           clearInterval(this.#intervalIDSearch);   
           headEl.classList.add('typing')
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
@@ -89,86 +98,85 @@ export class InputEvent{
           }
           return acc;
         },[]),...citiesDATA.cities.filter(cityDetails => !setSearch.has(`${cityDetails.city}-${cityDetails.state}-${cityDetails.country}`))];
-
-        //display search options container
-        if(!headEl.classList.contains('typing')){
-          headEl.classList.add('typing');
-        }
-        //clear out the interval
-        clearInterval(this.#intervalIDSearch);
-        //add html content to search options container 
-        searchOptionsContainer.innerHTML = citiesDATAWithSearchHistory.map(cityDetails => {
-            return `<div class="search-option-container ${cityDetails.hasBeenSearched ? 'recent-searched' : ''}" 
-            data-lat="${cityDetails.lat}"
-            data-lon="${cityDetails.lon}"
-            >
-            <i id="history" class="fa-solid fa-clock-rotate-left"></i>
-            <i id="location" class="fa-solid fa-location-dot"></i>
-            <div><span class="city-name">${cityDetails.city}</span>${cityDetails.state ? ` , <span class="state-name">${cityDetails.state}</span>`:''} , <span class="country-name">${cityDetails.country}</span></div>
-            <div class="recent-container">
-              <div class="remove-text">remove</div>
-            </div>
-          </div>`
-        }).join('\n');
-        
-        //make matching keyword bold 
-        document.querySelectorAll('.search-option-container').forEach(optionEl =>{
-          const cityEl = optionEl.querySelector('.city-name');
-          const stateEl = optionEl.querySelector('.state-name');
-          const countryEl = optionEl.querySelector('.country-name');
-          //if the keyword does not match any 
-          //word in the city then  match every letter 
-          //in city ,state(if availabe) & country
-          //with letters in the keyword
-          if(regex.test(cityEl.textContent)){
-            const newText = cityEl.textContent.replace(regex, match => `<span class="bold-text">${match}</span>`);
-            cityEl.innerHTML = newText;
-          }else{
-            const letters = [...new Set(keyword)].join('');
-            const regexp = new RegExp(`[${letters}]`,'gi');
-            const newText = cityEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
-            cityEl.innerHTML = newText;
-            if(stateEl){
-              const newText = stateEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
-              stateEl.innerHTML = newText;
-            }
-            const newTextCountry = countryEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
-            countryEl.innerHTML = newTextCountry;
-          }
           
-        });
-
-        document.querySelectorAll('.search-option-container').forEach(searchOption => {
-          searchOption.addEventListener('click',(e)=>{
-            const { lat , lon } = searchOption.dataset;
-            const cityDetails = this.#removeCityFromSearchHistory(searchOption);
-            this.#searchHistory.push(cityDetails);
-            localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));        
-            document.querySelector('input').value = searchOption.querySelector('.city-name').textContent;
-            headEl.classList.remove('typing');
-            e.stopPropagation();
-            this.#getWeatherHandler(lat,lon);
-          })
-        });
-
-        document.querySelectorAll('.remove-text').forEach(removeEl => {
-          removeEl.addEventListener('click',(e)=>{
-            const optionEl = removeEl.parentElement.parentElement;
-            this.#removeCityFromSearchHistory(optionEl);
-            localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));      
-            optionEl.classList.add('hide');
-            //hide the search options bar if 
-            //only one option was displayed
-            if(citiesDATAWithSearchHistory.length < 2){
-              headEl.classList.remove('typing');
+        
+        if(!this.#preventAutoSuggestion){
+          //clear out the interval
+          clearInterval(this.#intervalIDSearch);
+          headEl.classList.add('typing');
+          //add html content to search options container 
+          searchOptionsContainer.innerHTML = citiesDATAWithSearchHistory.map(cityDetails => {
+              return `<div class="search-option-container ${cityDetails.hasBeenSearched ? 'recent-searched' : ''}" 
+              data-lat="${cityDetails.lat}"
+              data-lon="${cityDetails.lon}"
+              >
+              <i id="history" class="fa-solid fa-clock-rotate-left"></i>
+              <i id="location" class="fa-solid fa-location-dot"></i>
+              <div><span class="city-name">${cityDetails.city}</span>${cityDetails.state ? ` , <span class="state-name">${cityDetails.state}</span>`:''} , <span class="country-name">${cityDetails.country}</span></div>
+              <div class="recent-container">
+                <div class="remove-text">remove</div>
+              </div>
+            </div>`
+          }).join('\n');
+          //make matching keyword bold 
+          document.querySelectorAll('.search-option-container').forEach(optionEl =>{
+            const cityEl = optionEl.querySelector('.city-name');
+            const stateEl = optionEl.querySelector('.state-name');
+            const countryEl = optionEl.querySelector('.country-name');
+            //if the keyword does not match any 
+            //word in the city then  match every letter 
+            //in city ,state(if availabe) & country
+            //with letters in the keyword
+            if(regex.test(cityEl.textContent)){
+              const newText = cityEl.textContent.replace(regex, match => `<span class="bold-text">${match}</span>`);
+              cityEl.innerHTML = newText;
+            }else{
+              const letters = [...new Set(keyword)].join('');
+              const regexp = new RegExp(`[${letters}]`,'gi');
+              const newText = cityEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
+              cityEl.innerHTML = newText;
+              if(stateEl){
+                const newText = stateEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
+                stateEl.innerHTML = newText;
+              }
+              const newTextCountry = countryEl.textContent.replace(regexp, match => `<span class="bold-text">${match}</span>`);
+              countryEl.innerHTML = newTextCountry;
             }
-            e.stopPropagation();
+            
           });
-        });
 
-        document.body.addEventListener('click',()=>{
-          headEl.classList.remove('typing');
-        });
+          document.querySelectorAll('.search-option-container').forEach(searchOption => {
+            searchOption.addEventListener('click',(e)=>{
+              const { lat , lon } = searchOption.dataset;
+              const cityDetails = this.#removeCityFromSearchHistory(searchOption);
+              this.#searchHistory.push(cityDetails);
+              localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));        
+              document.querySelector('input').value = searchOption.querySelector('.city-name').textContent;
+              headEl.classList.remove('typing');
+              e.stopPropagation();
+              this.#getWeatherHandler(lat,lon);
+            })
+          });
+
+          document.querySelectorAll('.remove-text').forEach(removeEl => {
+            removeEl.addEventListener('click',(e)=>{
+              const optionEl = removeEl.parentElement.parentElement;
+              this.#removeCityFromSearchHistory(optionEl);
+              localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));      
+              optionEl.classList.add('hide');
+              //hide the search options bar if 
+              //only one option was displayed
+              if(citiesDATAWithSearchHistory.length < 2){
+                headEl.classList.remove('typing');
+              }
+              e.stopPropagation();
+            });
+          });
+
+          document.body.addEventListener('click',()=>{
+            headEl.classList.remove('typing');
+          });
+        }
       }catch(error){
         console.log(error.message)
       };
@@ -223,15 +231,21 @@ export class InputEvent{
     document.querySelector('.weather-data-container').classList.remove('show-loading-text');
   };
 
-  async #handleEnterSearch(){
+  async #handleSearch(){
     //clear the auto suggestion timer and hide the suggested options
     clearTimeout(this.#timeoutId);
     document.querySelector('header').classList.remove('typing');
+    const keyword = document.querySelector('input').value;
+
+    if(keyword === ''){
+      return;
+    }
+    //remove  "no-result" class if any
+    document.querySelector('.weather-data-container').classList.remove('no-results');
     //display loading text
     document.querySelector('.weather-data-container').classList.add('show-loading-text');
     this.#intervalIDWeather = this.#handleLoadingEffect('loading-weather-text','loading-weather-text','Loading');
 
-    const keyword = document.querySelector('input').value;
     try{
       const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${keyword}&lang=en&format=json&apiKey=${geoCodingAPIKey}`);
 
