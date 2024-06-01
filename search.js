@@ -10,17 +10,18 @@ export class InputEvent{
   #intervalIDSearch;
   #intervalIDWeather;
   #searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
-  #preventAutoSuggestion;
+  #lastCallID = 0;
+  #callID = 0;
 
   constructor(inputEl,searchIcon){
     inputEl.addEventListener('input',()=>{
-      this.#preventAutoSuggestion = false;
+      this.#callID = ++this.#lastCallID;
       clearInterval(this.#intervalIDSearch);
       this.#loadingEffectSearch();
       clearTimeout(this.#timeoutId);
       this.#timeoutId =  setTimeout(()=>{
-        this.#autoSuggestCities();
-      },1500);
+        this.#autoSuggestCities(this.#callID);
+      },1000);
     });
 
     //on clicking input element make sure that
@@ -31,19 +32,17 @@ export class InputEvent{
 
     inputEl.addEventListener('keydown',(e)=>{
       if(e.key === 'Enter'){
-        this.#preventAutoSuggestion = true;
         this.#handleSearch();
       }
     });
 
     searchIcon.addEventListener('click',(e)=>{
-      this.#preventAutoSuggestion = true;
       this.#handleSearch();
       e.stopPropagation();
     });
   };
   
-  async #autoSuggestCities(){
+  async #autoSuggestCities(callID){
       const searchOptionsContainer = document.querySelector('.search-options-container');
       const headEl = document.querySelector('header');
       const keyword = document.querySelector('input').value;
@@ -61,7 +60,7 @@ export class InputEvent{
         
         const data = await response.json();
 
-        if(!data.results.length && !this.#preventAutoSuggestion){
+        if(!data.results.length && callID === this.#lastCallID){
           clearInterval(this.#intervalIDSearch);   
           headEl.classList.add('typing')
           searchOptionsContainer.innerHTML = `<div class="search-option-container"><span>No results found</span></div>`;
@@ -100,7 +99,7 @@ export class InputEvent{
         },[]),...citiesDATA.cities.filter(cityDetails => !setSearch.has(`${cityDetails.city}-${cityDetails.state}-${cityDetails.country}`))];
           
         
-        if(!this.#preventAutoSuggestion){
+        if(callID === this.#lastCallID){
           //clear out the interval
           clearInterval(this.#intervalIDSearch);
           headEl.classList.add('typing');
@@ -232,6 +231,7 @@ export class InputEvent{
   };
 
   async #handleSearch(){
+    this.#lastCallID++;
     //clear the auto suggestion timer and hide the suggested options
     clearTimeout(this.#timeoutId);
     document.querySelector('header').classList.remove('typing');

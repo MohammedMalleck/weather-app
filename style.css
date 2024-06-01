@@ -79,6 +79,7 @@ header {
   border-bottom-left-radius: 100vw;
   padding: 1rem 1.5rem;
   background-color:var(--search-color) ;
+  cursor: pointer;
 }
 .search-icon-container i {
   font-size: 1.4rem;
