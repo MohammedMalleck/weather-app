@@ -5,15 +5,17 @@ import { InputEvent } from "./search.js";
 async function loader() {
   const {longitude , latitude} =  await getCurrentLocation();
   document.querySelector("progress").value = 40;
-  const imageId = await getWeather(latitude,longitude);
+  const {id , cityName} = await getWeather(latitude,longitude);
   document.querySelector("progress").value = 70;
-  const imageLink = `images/${imageId}.jpg`;
+  const imageLink = `images/${id}.jpg`;
   document.querySelector("progress").value = 100;
   //add image first then display weather
   setTimeout(()=>{
     document.querySelector('.loader-container').classList.add('hide');
     document.querySelector("main").classList.add('addMask');
     document.querySelector("main").style.backgroundImage = `url(${imageLink})`;
+    //display current city name in search bar
+    document.querySelector('input').value = cityName;
   },500)
   setTimeout(() => {
     document.querySelector("main").classList.add("loadAnimation");

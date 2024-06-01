@@ -203,8 +203,8 @@ export class InputEvent{
     document.querySelector('.weather-data-container').classList.add('show-loading-text');
     this.#intervalIDWeather = this.#handleLoadingEffect('loading-weather-text','loading-weather-text','Loading');
     //first display weather then add image 
-    const id = await getWeather(latitude,longitude);
-    const imageLink = `images/${imageId}.jpg`;
+    const {id} = await getWeather(latitude,longitude);
+    const imageLink = `images/${id}.jpg`;
     //after adding weather data
     //remove the loading text
     clearInterval(this.#intervalIDWeather);

@@ -20,7 +20,7 @@ export async function getWeather(latitude,longitude){
     renderCurrentWeather(currentWeather);
     renderForecastWeather(weatherForecast);
 
-    return currentWeather.id;
+    return {id : currentWeather.id , cityName : currentWeather.cityName};
  
   }catch(error){
     console.log(error)  
