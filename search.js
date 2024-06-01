@@ -26,6 +26,12 @@ export class InputEvent{
     element.addEventListener('click',(e)=>{
       e.stopPropagation();
     });
+
+    element.addEventListener('keydown',(e)=>{
+      if(e.key === 'Enter'){
+        this.#handleEnterSearch();
+      }
+    });
   };
   
   async #autoSuggestCities(){
@@ -110,6 +116,10 @@ export class InputEvent{
           const cityEl = optionEl.querySelector('.city-name');
           const stateEl = optionEl.querySelector('.state-name');
           const countryEl = optionEl.querySelector('.country-name');
+          //if the keyword does not match any 
+          //word in the city then  match every letter 
+          //in city ,state(if availabe) & country
+          //with letters in the keyword
           if(regex.test(cityEl.textContent)){
             const newText = cityEl.textContent.replace(regex, match => `<span class="bold-text">${match}</span>`);
             cityEl.innerHTML = newText;
@@ -182,11 +192,11 @@ export class InputEvent{
   #loadingEffectSearch(){
     document.querySelector('header').classList.add('typing');
     const defaultHTML = `<div class="loading-search-text">Loading</div>`;
-    document.querySelector('.search-options-container').innerHTML = defaultHTML;
     this.#intervalIDSearch = this.#handleLoadingEffect('loading-search-text','search-options-container',defaultHTML);
   };
 
   #handleLoadingEffect(firstEl,secondEl,defaultHTML){
+    document.querySelector(`.${secondEl}`).innerHTML  = defaultHTML;
     let index = 0;
     return setInterval(()=>{
       if(index < 3){
@@ -213,5 +223,62 @@ export class InputEvent{
     document.querySelector('.weather-data-container').classList.remove('show-loading-text');
   };
 
+  async #handleEnterSearch(){
+    //clear the auto suggestion timer and hide the suggested options
+    clearTimeout(this.#timeoutId);
+    document.querySelector('header').classList.remove('typing');
+    //display loading text
+    document.querySelector('.weather-data-container').classList.add('show-loading-text');
+    this.#intervalIDWeather = this.#handleLoadingEffect('loading-weather-text','loading-weather-text','Loading');
 
+    const keyword = document.querySelector('input').value;
+    try{
+      const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${keyword}&lang=en&format=json&apiKey=${geoCodingAPIKey}`);
+
+      if(!response.ok) throw new Error('error found');
+      
+      const data = await response.json();
+
+      if(!data.results.length || !data.results[0].city){
+        //if no matching city is found then end the loading feature 
+        //and display no results
+        clearInterval(this.#intervalIDWeather);
+        document.querySelector('.weather-data-container').classList.remove('show-loading-text');
+        document.querySelector('.weather-data-container').classList.add('no-results');
+        return;
+      };
+
+    
+      const results = data.results;
+      const cityDetails = {
+        city : results[0].city,
+        state : results[0].city === results[0].state ? results[0].region  : results[0].state || results[0].region,
+        country : results[0].country,
+        lat : results[0].lat,
+        lon : results[0].lon
+      };
+      //check if this city is already present in the search history
+      //if yes then remove it first before adding it
+      const index = this.#searchHistory.findIndex( cityDetails2 => (cityDetails2.city === cityDetails.city && cityDetails2.state === cityDetails.state && cityDetails2.country === cityDetails.country));
+      if(index !== -1){
+        this.#searchHistory.splice(index,1);
+      }
+      this.#searchHistory.push(cityDetails);
+      localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));      
+
+      //after saving the city details in the search history 
+      //get the weather of this city 
+      const {id} = await getWeather(cityDetails.lat,cityDetails.lon);
+      const imageLink = `images/${id}.jpg`;
+      //after adding weather data
+      //remove the loading text
+      clearInterval(this.#intervalIDWeather);
+      document.querySelector('main').style.backgroundImage = `url(${imageLink})`;
+      document.querySelector('.weather-data-container').classList.remove('show-loading-text');
+      //also display the city name on search input
+      document.querySelector('input').value = cityDetails.city;
+    }catch(error){
+      console.log(error.message)
+    };
+  };
 };
