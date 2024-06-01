@@ -27,7 +27,8 @@ export async function getWeather(latitude,longitude){
     return {id : currentWeather.id , cityName : currentWeather.cityName};
  
   }catch(error){
-    console.log(error)  
+    document.querySelector('.error-container').classList.add('show');
+    document.querySelector('.additional-info-error').innerHTML = error.message;
   }
 
   function getCurrentWeather(data){

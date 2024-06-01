@@ -51,3 +51,7 @@ async function getCurrentLocation(){
 }
 
 new InputEvent(document.querySelector('input'),document.querySelector('.search-icon-container'));
+
+document.querySelector('.read-more').addEventListener('click',()=>{
+  document.querySelector('.error-text-container').classList.add('show');
+});

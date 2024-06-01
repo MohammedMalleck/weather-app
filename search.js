@@ -178,7 +178,8 @@ export class InputEvent{
           });
         }
       }catch(error){
-        console.log(error.message)
+        document.querySelector('.error-container').classList.add('show');
+        document.querySelector('.additional-info-error').innerHTML = error.message;
       };
   };
 
@@ -303,7 +304,8 @@ export class InputEvent{
       //start the timer 
       timer.startTimer();
     }catch(error){
-      console.log(error.message)
+      document.querySelector('.error-container').classList.add('show');
+      document.querySelector('.additional-info-error').innerHTML = error.message;
     };
   };
 };
