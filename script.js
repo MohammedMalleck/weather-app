@@ -23,6 +23,10 @@ async function loader() {
 }
 loader();
 
+document.body.addEventListener('animationend',()=>{
+  document.body.style.backgroundColor = 'white';
+});
+
 
 
 async function getCurrentLocation(){

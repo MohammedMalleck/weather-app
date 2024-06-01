@@ -173,6 +173,9 @@ header.typing .search-options-container{
   font-size: 1.8rem;
   display: none;
 }
+.loading-weather-text{
+  min-width: 7.85rem;
+}
 .weather-data-container.show-loading-text .loading-weather-text,
 .weather-data-container.no-results .no-results-text{
   display: flex;
@@ -277,6 +280,7 @@ header.typing .search-options-container{
   justify-content: center;
   padding: 0.5rem 1rem;
   gap: 0.5rem;
+  min-width: 9.75rem;
 }
 .forecast-data:nth-child(1){
   margin-left: 3rem;
@@ -346,7 +350,7 @@ progress::-webkit-progress-value {
   border-bottom-right-radius: 0.5rem;
   transition: width 0.5s ease;
 }
-@media(max-width:920px){
+@media(max-width:930px){
   .weather-info-container{
     grid-template-columns: repeat(3,minmax(auto,1fr));
     justify-content: center;
@@ -359,7 +363,7 @@ progress::-webkit-progress-value {
     width: 7rem;
   }
   .extra-data-container{
-    height: 16.4rem;
+    height: 16.8rem;
     gap: 2rem;
   }
   .data-heading,
