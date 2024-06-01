@@ -19,6 +19,8 @@ export async function getWeather(latitude,longitude){
 
     renderCurrentWeather(currentWeather);
     renderForecastWeather(weatherForecast);
+
+    return currentWeather.id;
  
   }catch(error){
     console.log(error)  
@@ -26,6 +28,7 @@ export async function getWeather(latitude,longitude){
 
   function getCurrentWeather(data){
     return {
+      id : data.weather[0].icon,
       cityName : data.name,
       weatherDescription : data.weather[0].description.replace(/\b\w/g,match => match.toUpperCase()),
       imgSrc : getImgSrc(data.weather[0].icon),

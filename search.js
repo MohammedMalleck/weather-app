@@ -203,10 +203,12 @@ export class InputEvent{
     document.querySelector('.weather-data-container').classList.add('show-loading-text');
     this.#intervalIDWeather = this.#handleLoadingEffect('loading-weather-text','loading-weather-text','Loading');
     //first display weather then add image 
-    await getWeather(latitude,longitude);
+    const id = await getWeather(latitude,longitude);
+    const imageLink = `images/${imageId}.jpg`;
     //after adding weather data
     //remove the loading text
     clearInterval(this.#intervalIDWeather);
+    document.querySelector('main').style.backgroundImage = `url(${imageLink})`;
     document.querySelector('.weather-data-container').classList.remove('show-loading-text');
   }
 };

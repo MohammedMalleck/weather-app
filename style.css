@@ -52,7 +52,7 @@ main.loadAnimation{
 }
 @keyframes loadAnimation {
   to{
-    mask-size: 200%;
+    mask-size: 400%;
   }
 }
 .weather-data-container {
