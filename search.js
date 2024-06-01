@@ -17,7 +17,7 @@ export class InputEvent{
       this.#loadingEffectSearch();
       clearTimeout(this.#timeoutId);
       this.#timeoutId =  setTimeout(()=>{
-        this.autoSuggestCities();
+        this.#autoSuggestCities();
       },1000);
     });
 
@@ -26,9 +26,9 @@ export class InputEvent{
     element.addEventListener('click',(e)=>{
       e.stopPropagation();
     });
-  }
+  };
   
-  async autoSuggestCities(){
+  async #autoSuggestCities(){
       const searchOptionsContainer = document.querySelector('.search-options-container');
       const headEl = document.querySelector('header');
       const keyword = document.querySelector('input').value;
@@ -176,14 +176,14 @@ export class InputEvent{
       this.#searchHistory.splice(index,1);
     }
     return cityDetails;
-  }
+  };
 
   #loadingEffectSearch(){
     document.querySelector('header').classList.add('typing');
     const defaultHTML = `<div class="loading-search-text">Loading</div>`;
     document.querySelector('.search-options-container').innerHTML = defaultHTML;
     this.#intervalIDSearch = this.#handleLoadingEffect('loading-search-text','search-options-container',defaultHTML);
-  }
+  };
 
   #handleLoadingEffect(firstEl,secondEl,defaultHTML){
     let index = 0;
@@ -196,7 +196,7 @@ export class InputEvent{
         index = 0;
       }
     },500);
-  }
+  };
 
   async #getWeatherHandler(latitude,longitude){
     //display loading text
@@ -210,5 +210,7 @@ export class InputEvent{
     clearInterval(this.#intervalIDWeather);
     document.querySelector('main').style.backgroundImage = `url(${imageLink})`;
     document.querySelector('.weather-data-container').classList.remove('show-loading-text');
-  }
+  };
+
+
 };
