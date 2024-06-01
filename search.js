@@ -133,7 +133,6 @@ export class InputEvent{
             const { lat , lon } = searchOption.dataset;
             const cityDetails = this.#removeCityFromSearchHistory(searchOption);
             this.#searchHistory.push(cityDetails);
-            console.log(this.#searchHistory)
             localStorage.setItem('searchHistory', JSON.stringify(this.#searchHistory));        
             document.querySelector('input').value = searchOption.querySelector('.city-name').textContent;
             headEl.classList.remove('typing');
@@ -168,8 +167,10 @@ export class InputEvent{
   #removeCityFromSearchHistory(element){
     const cityDetails = {
       city : element.querySelector('.city-name').textContent,
-      state : element.querySelector('.state-name').textContent,
-      country : element.querySelector('.country-name').textContent
+      state : element.querySelector('.state-name') ? element.querySelector('.state-name').textContent : undefined,
+      country : element.querySelector('.country-name').textContent,
+      lat : element.dataset.lat,
+      lon : element.dataset.lon
     };
     const index = this.#searchHistory.findIndex( cityDetails2 => (cityDetails2.city === cityDetails.city && cityDetails2.state === cityDetails.state && cityDetails2.country === cityDetails.country));
     if(index !== -1){
