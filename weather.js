@@ -20,6 +20,10 @@ export async function getWeather(latitude,longitude){
     renderCurrentWeather(currentWeather);
     renderForecastWeather(weatherForecast);
 
+    //give header lat and lon values
+    document.querySelector('header').dataset.lat = latitude;
+    document.querySelector('header').dataset.lon = longitude;
+
     return {id : currentWeather.id , cityName : currentWeather.cityName};
  
   }catch(error){

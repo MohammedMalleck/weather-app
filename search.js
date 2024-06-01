@@ -1,5 +1,6 @@
 import { apiKeys } from "./keys.js";
 import { getWeather } from "./weather.js";
+import { timer } from "./script.js";
 
 
 const { geoCodingAPIKey } = apiKeys;
@@ -217,6 +218,8 @@ export class InputEvent{
   };
 
   async #getWeatherHandler(latitude,longitude){
+    //cancel timer
+    timer.cancelTimer();
     //display loading text
     document.querySelector('.weather-data-container').classList.add('show-loading-text');
     this.#intervalIDWeather = this.#handleLoadingEffect('loading-weather-text','loading-weather-text','Loading');
@@ -228,9 +231,14 @@ export class InputEvent{
     clearInterval(this.#intervalIDWeather);
     document.querySelector('main').style.backgroundImage = `url(${imageLink})`;
     document.querySelector('.weather-data-container').classList.remove('show-loading-text');
+
+    //start timer
+    timer.startTimer();
   };
 
   async #handleSearch(){
+    //cancel timer 
+    timer.cancelTimer();
     this.#lastCallID++;
     //clear the auto suggestion timer and hide the suggested options
     clearTimeout(this.#timeoutId);
@@ -291,6 +299,9 @@ export class InputEvent{
       document.querySelector('.weather-data-container').classList.remove('show-loading-text');
       //also display the city name on search input
       document.querySelector('input').value = cityDetails.city;
+
+      //start the timer 
+      timer.startTimer();
     }catch(error){
       console.log(error.message)
     };

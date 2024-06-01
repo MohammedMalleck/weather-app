@@ -1,6 +1,8 @@
 import { getWeather } from "./weather.js";
 import { InputEvent } from "./search.js";
+import { TimerWeather } from "./timer.js";
 
+export const timer = new TimerWeather();
 
 async function loader() {
   const {longitude , latitude} =  await getCurrentLocation();
@@ -20,6 +22,9 @@ async function loader() {
   setTimeout(() => {
     document.querySelector("main").classList.add("loadAnimation");
   }, 1000);
+
+  //start the timer
+  timer.startTimer();
 }
 loader();
 
