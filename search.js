@@ -15,20 +15,28 @@ export class InputEvent{
   #callID = 0;
 
   constructor(inputEl,searchIcon){
-    inputEl.addEventListener('input',()=>{
+    inputEl.addEventListener('input',(e)=>{
       this.#callID = ++this.#lastCallID;
       clearInterval(this.#intervalIDSearch);
-      this.#loadingEffectSearch();
       clearTimeout(this.#timeoutId);
+      //stop the auto search feature from executing if the 
+      //new value in the field is empty
+      if(e.target.value === '') {
+        document.querySelector('header').classList.remove('typing')
+        return;
+      };
+      this.#loadingEffectSearch();
       this.#timeoutId =  setTimeout(()=>{
         this.#autoSuggestCities(this.#callID);
-      },1000);
+      },300);
     });
 
     //on clicking input element make sure that
     //search option does not get hidden.
     inputEl.addEventListener('click',(e)=>{
       e.stopPropagation();
+      //clear the input value for user convenience
+      e.target.value = '';
     });
 
     inputEl.addEventListener('keydown',(e)=>{
@@ -48,11 +56,6 @@ export class InputEvent{
       const headEl = document.querySelector('header');
       const keyword = document.querySelector('input').value;
       const regex = new RegExp(keyword,'gi');
-
-      if(keyword === ''){
-        headEl.classList.remove('typing')
-        return;
-      }
 
       try{
         const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${keyword}&lang=en&format=json&apiKey=${geoCodingAPIKey}`);
